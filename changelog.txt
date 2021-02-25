@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.4 
 Date: 2021-02-25
-  Changes: 
+  Changes:
     - Variants (thanks NanBei https://mods.factorio.com/user/NanBei)
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.2
@@ -34,4 +34,3 @@ Version: 0.1.0
 Date: 2019-07-03
   Features:
     - Simple date time darkness
-   
