@@ -28,6 +28,51 @@ function FormatPlaytimeInformation(player)
                .. daytimeString
 end
 
+local Clock = {
+    left = {Next = "top"},
+    top = {Next = "left"},
+    transparent = {Next = "opaque"},
+    opaque = {Next = "transparent"},
+}
+
+function EnsureClockLocation(index)
+    if not global.ixuClock then global.ixuClock = {} end
+    if not global.ixuClock[index] then global.ixuClock[index] = {} end
+    if not global.ixuClock[index].Location then global.ixuClock[index].Location = "left" end
+    if not global.ixuClock[index].Variant then global.ixuClock[index].Variant = "transparent" end
+    return Clock[global.ixuClock[index].Location]
+end
+
+function Clock.left.Area(player) return mod_gui.get_frame_flow(player) end
+
+function Clock.top.Area(player) return player.gui.top end
+
+function GetGui(variant)
+    return {
+        type = variant.Variant == "transparent" and "label" or "button",
+        name = "ixuClock",
+        tooltip = "try left or right mouse click",
+    }
+end
+
+function EnsureClock(index)
+    local result = GetClock(index)
+    if result then return result end
+
+    local variant = EnsureClockLocation(index)
+    local result = variant.Area(game.players[index]).add(GetGui(global.ixuClock[index]))
+    if global.ixuClock[index].Location == "float" then
+        result.location = global.ixuClock[index].GuiLocation
+    end
+    return result
+end
+
+function GetClock(index)
+    local variant = EnsureClockLocation(index)
+    local area = variant.Area(game.players[index])
+    return area.ixuClock
+end
+
 function ShowFormatPlaytimeInformation(event)
     local previous = play_time_seconds
 
@@ -36,15 +81,23 @@ function ShowFormatPlaytimeInformation(event)
     if previous == play_time_seconds then return end
 
     for i, player in pairs(game.connected_players) do
-        -- remove legacy clock line
-        if player.gui.top.hwclock then player.gui.top.hwclock.destroy() end
-
-        local hwclock = mod_gui.get_frame_flow(player).hwclock
-        if not hwclock then
-            hwclock = mod_gui.get_frame_flow(player).add {type = "label", name = "hwclock"}
-        end
+        local ixuClock = EnsureClock(player.index)
         local value = FormatPlaytimeInformation(player)
-        hwclock.caption = value
+        ixuClock.caption = value
     end
 end
 
+function OnClick(event) --
+    local index = event.player_index
+    if event.element == GetClock(index) then --
+        GetClock(index).destroy()
+        if event.button == defines.mouse_button_type.left then
+            global.ixuClock[index].Location = Clock[global.ixuClock[index].Location].Next
+        elseif event.button == defines.mouse_button_type.right then
+            global.ixuClock[index].Variant = Clock[global.ixuClock[index].Variant].Next
+        end
+        EnsureClock(index)
+    end
+end
+
+script.on_event(defines.events.on_gui_click, OnClick)
