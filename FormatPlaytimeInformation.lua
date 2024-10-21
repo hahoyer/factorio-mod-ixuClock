@@ -25,22 +25,22 @@ function FormatPlaytimeInformation(player)
     local daytimeString = string.format("%02d:%02d", dayhour, dayminutes)
 
     return dayString .. hourString .. playtimeString .. " " .. crashdaysString .. " "
-               .. daytimeString
+        .. daytimeString
 end
 
 local Clock = {
-    left = {Next = "top"},
-    top = {Next = "left"},
-    transparent = {Next = "opaque"},
-    opaque = {Next = "transparent"},
+    left = { Next = "top" },
+    top = { Next = "left" },
+    transparent = { Next = "opaque" },
+    opaque = { Next = "transparent" },
 }
 
 function EnsureClockLocation(index)
-    if not global.ixuClock then global.ixuClock = {} end
-    if not global.ixuClock[index] then global.ixuClock[index] = {} end
-    if not global.ixuClock[index].Location then global.ixuClock[index].Location = "left" end
-    if not global.ixuClock[index].Variant then global.ixuClock[index].Variant = "transparent" end
-    return Clock[global.ixuClock[index].Location]
+    if not storage.ixuClock then storage.ixuClock = {} end
+    if not storage.ixuClock[index] then storage.ixuClock[index] = {} end
+    if not storage.ixuClock[index].Location then storage.ixuClock[index].Location = "left" end
+    if not storage.ixuClock[index].Variant then storage.ixuClock[index].Variant = "transparent" end
+    return Clock[storage.ixuClock[index].Location]
 end
 
 function Clock.left.Area(player) return mod_gui.get_frame_flow(player) end
@@ -60,9 +60,9 @@ function EnsureClock(index)
     if result then return result end
 
     local variant = EnsureClockLocation(index)
-    local result = variant.Area(game.players[index]).add(GetGui(global.ixuClock[index]))
-    if global.ixuClock[index].Location == "float" then
-        result.location = global.ixuClock[index].GuiLocation
+    local result = variant.Area(game.players[index]).add(GetGui(storage.ixuClock[index]))
+    if storage.ixuClock[index].Location == "float" then
+        result.location = storage.ixuClock[index].GuiLocation
     end
     return result
 end
@@ -87,14 +87,14 @@ function ShowFormatPlaytimeInformation(event)
     end
 end
 
-function OnClick(event) --
+function OnClick(event)                      --
     local index = event.player_index
     if event.element == GetClock(index) then --
         GetClock(index).destroy()
         if event.button == defines.mouse_button_type.left then
-            global.ixuClock[index].Location = Clock[global.ixuClock[index].Location].Next
+            storage.ixuClock[index].Location = Clock[storage.ixuClock[index].Location].Next
         elseif event.button == defines.mouse_button_type.right then
-            global.ixuClock[index].Variant = Clock[global.ixuClock[index].Variant].Next
+            storage.ixuClock[index].Variant = Clock[storage.ixuClock[index].Variant].Next
         end
         EnsureClock(index)
     end
